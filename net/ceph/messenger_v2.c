@@ -733,8 +733,6 @@ static int setup_crypto(struct ceph_connection *con,
 		return ret;
 	}
 
-	WARN_ON((unsigned long)session_key &
-		crypto_shash_alignmask(con->v2.hmac_tfm));
 	ret = crypto_shash_setkey(con->v2.hmac_tfm, session_key,
 				  session_key_len);
 	if (ret) {
@@ -816,8 +814,6 @@ static int hmac_sha256(struct ceph_connection *con, const struct kvec *kvecs,
 		goto out;
 
 	for (i = 0; i < kvec_cnt; i++) {
-		WARN_ON((unsigned long)kvecs[i].iov_base &
-			crypto_shash_alignmask(con->v2.hmac_tfm));
 		ret = crypto_shash_update(desc, kvecs[i].iov_base,
 					  kvecs[i].iov_len);
 		if (ret)
@@ -1132,7 +1128,7 @@ static int decrypt_tail(struct ceph_connection *con)
 	struct sg_table enc_sgt = {};
 	struct sg_table sgt = {};
 	struct page **pages = NULL;
-	bool sparse = con->in_msg->sparse_read;
+	bool sparse = !!con->in_msg->sparse_read_total;
 	int dpos = 0;
 	int tail_len;
 	int ret;
@@ -2064,7 +2060,7 @@ static int prepare_read_tail_plain(struct ceph_connection *con)
 	}
 
 	if (data_len(msg)) {
-		if (msg->sparse_read)
+		if (msg->sparse_read_total)
 			con->v2.in_state = IN_S_PREPARE_SPARSE_DATA;
 		else
 			con->v2.in_state = IN_S_PREPARE_READ_DATA;

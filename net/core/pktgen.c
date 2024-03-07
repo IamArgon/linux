@@ -3669,10 +3669,8 @@ static int pktgen_thread_worker(void *arg)
 		if (unlikely(!pkt_dev && t->control == 0)) {
 			if (t->net->pktgen_exiting)
 				break;
-			wait_event_interruptible_timeout(t->queue,
-							 t->control != 0,
-							 HZ/10);
-			try_to_freeze();
+			wait_event_freezable_timeout(t->queue,
+						     t->control != 0, HZ / 10);
 			continue;
 		}
 
@@ -4032,8 +4030,7 @@ static void __net_exit pg_net_exit(struct net *net)
 	list_for_each_safe(q, n, &list) {
 		t = list_entry(q, struct pktgen_thread, th_list);
 		list_del(&t->th_list);
-		kthread_stop(t->tsk);
-		put_task_struct(t->tsk);
+		kthread_stop_put(t->tsk);
 		kfree(t);
 	}
 

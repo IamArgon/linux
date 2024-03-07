@@ -550,9 +550,9 @@ static const struct iwl_hcmd_names iwl_mvm_system_names[] = {
 	HCMD_NAME(RFI_CONFIG_CMD),
 	HCMD_NAME(RFI_GET_FREQ_TABLE_CMD),
 	HCMD_NAME(SYSTEM_FEATURES_CONTROL_CMD),
-	HCMD_NAME(RFI_DEACTIVATE_NOTIF),
 	HCMD_NAME(SYSTEM_STATISTICS_CMD),
 	HCMD_NAME(SYSTEM_STATISTICS_END_NOTIF),
+	HCMD_NAME(RFI_DEACTIVATE_NOTIF),
 };
 
 /* Please keep this array *SORTED* by hex value.
@@ -1703,18 +1703,6 @@ void iwl_mvm_rx_mq(struct iwl_op_mode *op_mode,
 		iwl_mvm_rx_common(mvm, rxb, pkt);
 }
 
-static void iwl_mvm_async_cb(struct iwl_op_mode *op_mode,
-			     const struct iwl_device_cmd *cmd)
-{
-	struct iwl_mvm *mvm = IWL_OP_MODE_GET_MVM(op_mode);
-
-	/*
-	 * For now, we only set the CMD_WANT_ASYNC_CALLBACK for ADD_STA
-	 * commands that need to block the Tx queues.
-	 */
-	iwl_trans_block_txq_ptrs(mvm->trans, false);
-}
-
 static int iwl_mvm_is_static_queue(struct iwl_mvm *mvm, int queue)
 {
 	return queue == mvm->aux_queue || queue == mvm->probe_queue ||
@@ -2024,7 +2012,6 @@ static void iwl_op_mode_mvm_time_point(struct iwl_op_mode *op_mode,
 
 #define IWL_MVM_COMMON_OPS					\
 	/* these could be differentiated */			\
-	.async_cb = iwl_mvm_async_cb,				\
 	.queue_full = iwl_mvm_stop_sw_queue,			\
 	.queue_not_full = iwl_mvm_wake_sw_queue,		\
 	.hw_rf_kill = iwl_mvm_set_hw_rfkill_state,		\

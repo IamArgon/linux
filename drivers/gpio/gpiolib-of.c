@@ -184,7 +184,7 @@ static void of_gpio_try_fixup_polarity(const struct device_node *np,
 		const char *propname;
 		bool active_high;
 	} gpios[] = {
-#if !IS_ENABLED(CONFIG_LCD_HX8357)
+#if IS_ENABLED(CONFIG_LCD_HX8357)
 		/*
 		 * Himax LCD controllers used incorrectly named
 		 * "gpios-reset" property and also specified wrong
@@ -478,7 +478,7 @@ static struct gpio_desc *of_find_gpio_rename(struct device_node *np,
 		 */
 		const char *compatible;
 	} gpios[] = {
-#if !IS_ENABLED(CONFIG_LCD_HX8357)
+#if IS_ENABLED(CONFIG_LCD_HX8357)
 		/* Himax LCD controllers used "gpios-reset" */
 		{ "reset",	"gpios-reset",	"himax,hx8357" },
 		{ "reset",	"gpios-reset",	"himax,hx8369" },
@@ -521,6 +521,10 @@ static struct gpio_desc *of_find_gpio_rename(struct device_node *np,
 
 #if IS_ENABLED(CONFIG_SND_SOC_CS42L56)
 		{ "reset",	"cirrus,gpio-nreset",	"cirrus,cs42l56" },
+#endif
+#if IS_ENABLED(CONFIG_SND_SOC_MT2701_CS42448)
+		{ "i2s1-in-sel-gpio1",	NULL,	"mediatek,mt2701-cs42448-machine" },
+		{ "i2s1-in-sel-gpio2",	NULL,	"mediatek,mt2701-cs42448-machine" },
 #endif
 #if IS_ENABLED(CONFIG_SND_SOC_TLV320AIC3X)
 		{ "reset",	"gpio-reset",	"ti,tlv320aic3x" },
